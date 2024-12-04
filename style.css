@@ -1,0 +1,41 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background-color: ghostwhite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slider {
+    --posX: 10000px;
+    --speed: 0ms;
+    height: 60px;
+    width: 500px;
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 1em;
+    margin: 2em;
+}
+
+.track {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, black 1px, transparent 1px);
+    background-size: 20px 100%;
+    background-position-x: var(--posX);
+}
+
+.slider.animate .track {
+    transition: background-position-x var(--speed) ease-out;
+}
