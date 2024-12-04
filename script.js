@@ -1,6 +1,7 @@
 const slider = document.querySelector(".slider");
 const track = slider.querySelector(".track");
 
+let initialX = 0;
 let startX = 0;
 let deltaX = 0;
 let posX = 0;
@@ -17,15 +18,16 @@ function onTouchStart (ev) {
 
     touchStart = Date.now();
     startX = ev.touches[0].clientX;
+    initialX = startX;
 }
 
 function onTouchMove (ev) {
     deltaX = ev.touches[0].clientX - startX;
+    startX = ev.touches[0].clientX;
     posX += deltaX;
     dir = deltaX > 0 ? 1 : -1;
 
     if (prevDir !== dir) {
-        startX = ev.touches[0].clientX;
         prevDir = dir;
     }
 
@@ -35,6 +37,7 @@ function onTouchMove (ev) {
 function onTouchEnd (ev) {
     touchEnd = Date.now();
     time = (touchEnd - touchStart) / 1000;
+    deltaX = ev.changedTouches[0].clientX - initialX;
 
     speed = time > 0 ? Math.abs(deltaX / time) : 0;
     targetX = posX + speed * 0.25 * dir;

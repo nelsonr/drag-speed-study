@@ -33,6 +33,7 @@ body {
     width: 100%;
     background: linear-gradient(to right, black 1px, transparent 1px);
     background-size: 20px 100%;
+    background-position-y: bottom;
     background-position-x: var(--posX);
 }
 
