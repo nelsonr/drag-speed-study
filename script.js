@@ -48,7 +48,7 @@ function onTouchEnd (ev) {
     deltaX = ev.changedTouches[0].clientX - initialX;
 
     speed = speed + time > 0 ? Math.abs(deltaX / time) * 0.5 : 0;
-    speed = Math.min(speed, 180);
+    speed = Math.min(speed, 250);
     targetX = Math.floor(posX + speed * 0.25 * dir);
 
     prevTime = 0;
