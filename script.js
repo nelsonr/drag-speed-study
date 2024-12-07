@@ -1,8 +1,17 @@
 const slider = document.querySelector(".slider");
-const track = slider.querySelector(".track");
+const trackEl = slider.querySelector(".track");
+const valueEl = document.getElementById("value");
 
+const tickGap = 20;
+
+let animationFrameId = null;
+let elapsedTime = 0;
+let prevTime = 0;
+let totalTime = 2000;
+
+let value = 0;
 let initialX = 0;
-let startX = 0;
+let currentX = 0;
 let deltaX = 0;
 let posX = 0;
 let targetX = 0;
@@ -10,28 +19,27 @@ let time = 0;
 let speed = 0;
 let touchStart = 0;
 let touchEnd = 0;
-let prevDir = 1;
 let dir = 1;
 
 function onTouchStart (ev) {
     slider.classList.remove("animate");
 
     touchStart = Date.now();
-    startX = ev.touches[0].clientX;
-    initialX = startX;
+    currentX = ev.touches[0].clientX;
+    initialX = currentX;
+
+    cancelAnimationFrame(animationFrameId);
 }
 
 function onTouchMove (ev) {
-    deltaX = ev.touches[0].clientX - startX;
-    startX = ev.touches[0].clientX;
-    posX += deltaX;
-    dir = deltaX > 0 ? 1 : -1;
+    deltaX = Math.floor(ev.touches[0].clientX - currentX);
+    currentX = Math.floor(ev.touches[0].clientX);
+    posX -= Math.floor(deltaX);
+    dir = deltaX > 0 ? -1 : 1;
 
-    if (prevDir !== dir) {
-        prevDir = dir;
-    }
+    valueEl.textContent = ((posX) / tickGap).toFixed(0);
 
-    slider.style.setProperty("--posX", posX + "px");
+    slider.style.setProperty("--posX", -posX + "px");
 }
 
 function onTouchEnd (ev) {
@@ -39,20 +47,36 @@ function onTouchEnd (ev) {
     time = (touchEnd - touchStart) / 1000;
     deltaX = ev.changedTouches[0].clientX - initialX;
 
-    speed = time > 0 ? Math.abs(deltaX / time) : 0;
-    targetX = posX + speed * 0.25 * dir;
+    speed = speed + time > 0 ? Math.abs(deltaX / time) * 0.5 : 0;
+    speed = Math.min(speed, 180);
+    targetX = Math.floor(posX + speed * 0.25 * dir);
 
-    slider.classList.add("animate");
+    prevTime = 0;
+    elapsedTime = 0;
+    animationFrameId = requestAnimationFrame(animatePosition);
 
-    slider.addEventListener("transitionend", () => {
-        slider.classList.remove("animate");
-    }, { once: true });
+    currentX = ev.changedTouches[0].clientX;
+    valueEl.textContent = ((posX) / 20).toFixed(0);
+}
 
-    slider.style.setProperty("--speed", speed + "ms");
-    slider.style.setProperty("--posX", targetX + "px");
+function animatePosition (timeStamp = 0) {
+    if (speed < 0.01) {
+        return cancelAnimationFrame(animationFrameId);
+    }
 
-    posX = targetX;
-    startX = ev.changedTouches[0].clientX;
+    animationFrameId = requestAnimationFrame(animatePosition);
+
+    posX += speed * 0.05 * dir;
+
+    elapsedTime += (timeStamp - prevTime);
+    prevTime = timeStamp;
+    let progress = Math.min(elapsedTime / totalTime, 1.0);
+
+    speed = speed * (1 - Math.pow(progress * 0.25, 3));
+    console.log("Speed: %d Progress: %d", speed, progress);
+
+    valueEl.textContent = ((posX) / tickGap).toFixed(0);
+    slider.style.setProperty("--posX", -posX + "px");
 }
 
 slider.addEventListener("touchstart", onTouchStart);
