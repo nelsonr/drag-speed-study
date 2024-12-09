@@ -14,11 +14,10 @@ let initialX = 0;
 let currentX = 0;
 let deltaX = 0;
 let posX = 0;
-let targetX = 0;
 let time = 0;
 let speed = 0;
 let touchStart = 0;
-let touchEnd = 0;
+let prevDir = 1;
 let dir = 1;
 
 function onTouchStart (ev) {
@@ -27,6 +26,8 @@ function onTouchStart (ev) {
     touchStart = Date.now();
     currentX = ev.touches[0].clientX;
     initialX = currentX;
+
+    speed = 0;
 
     cancelAnimationFrame(animationFrameId);
 }
@@ -37,23 +38,31 @@ function onTouchMove (ev) {
     posX -= Math.floor(deltaX);
     dir = deltaX > 0 ? -1 : 1;
 
-    valueEl.textContent = ((posX) / tickGap).toFixed(0);
+    if (prevDir !== dir) {
+        touchStart = Date.now();
+        prevDir = dir;
+        initialX = currentX;
+    }
 
+    valueEl.textContent = ((posX) / tickGap).toFixed(0);
     slider.style.setProperty("--posX", -posX + "px");
 }
 
 function onTouchEnd (ev) {
-    touchEnd = Date.now();
-    time = (touchEnd - touchStart) / 1000;
+    time = (Date.now() - touchStart);
     deltaX = ev.changedTouches[0].clientX - initialX;
-
-    speed = speed + time > 0 ? Math.abs(deltaX / time) * 0.5 : 0;
+    speed = (time > 0 ? Math.abs(deltaX / time) * 100 : 0);
     speed = Math.min(speed, 250);
-    targetX = Math.floor(posX + speed * 0.25 * dir);
 
-    prevTime = 0;
-    elapsedTime = 0;
-    animationFrameId = requestAnimationFrame(animatePosition);
+    console.log("DeltaX:", deltaX);
+    console.log("Time:", time);
+    console.log("Speed: %f\n\n", speed)
+
+    if (speed >= 50) {
+        prevTime = 0;
+        elapsedTime = 0;
+        animationFrameId = requestAnimationFrame(animatePosition);
+    }
 
     currentX = ev.changedTouches[0].clientX;
     valueEl.textContent = ((posX) / 20).toFixed(0);
@@ -73,7 +82,7 @@ function animatePosition (timeStamp = 0) {
     let progress = Math.min(elapsedTime / totalTime, 1.0);
 
     speed = speed * (1 - Math.pow(progress * 0.25, 3));
-    console.log("Speed: %d Progress: %d", speed, progress);
+    // console.log("Speed: %d Progress: %d", speed, progress);
 
     valueEl.textContent = ((posX) / tickGap).toFixed(0);
     slider.style.setProperty("--posX", -posX + "px");
