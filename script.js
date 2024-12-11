@@ -51,7 +51,7 @@ function onTouchMove (ev) {
 function onTouchEnd (ev) {
     time = (Date.now() - touchStart);
     deltaX = ev.changedTouches[0].clientX - initialX;
-    speed = (time > 0 ? Math.abs(deltaX / time) * 100 : 0);
+    speed = speed + (time > 0 ? Math.abs(deltaX / time) * 100 : 0);
     speed = Math.min(speed, 250);
 
     console.log("DeltaX:", deltaX);
